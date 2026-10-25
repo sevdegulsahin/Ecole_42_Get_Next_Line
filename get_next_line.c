@@ -1,6 +1,13 @@
 
 #include "get_next_line.h"
 
+static char	*read_fail(char *buf, char *stash)
+{
+	free(buf);
+	free(stash);
+	return (NULL);
+}
+
 static char	*read_into_stash(int fd, char *stash)
 {
 	char	*buf;
@@ -14,11 +21,7 @@ static char	*read_into_stash(int fd, char *stash)
 	{
 		bytes_read = read(fd, buf, BUFFER_SIZE);
 		if (bytes_read < 0)
-		{
-			free(buf);
-			free(stash);
-			return (NULL);
-		}
+			return (read_fail(buf, stash));
 		buf[bytes_read] = '\0';
 		stash = gnl_strjoin(stash, buf);
 		if (!stash)

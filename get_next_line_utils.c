@@ -31,30 +31,28 @@ char	*gnl_strchr(const char *s, int c)
 char	*gnl_strjoin(char *s1, char *s2)
 {
 	char	*result;
-	size_t	len1;
-	size_t	len2;
 	size_t	i;
+	size_t	j;
 
-	len1 = gnl_strlen(s1);
-	len2 = gnl_strlen(s2);
-	result = malloc(len1 + len2 + 1);
+	result = malloc(gnl_strlen(s1) + gnl_strlen(s2) + 1);
 	if (!result)
 	{
 		free(s1);
 		return (NULL);
 	}
 	i = 0;
-	while (i < len1)
+	while (s1 && s1[i])
 	{
 		result[i] = s1[i];
 		i++;
 	}
-	while (i < len1 + len2)
+	j = 0;
+	while (s2 && s2[j])
 	{
-		result[i] = s2[i - len1];
-		i++;
+		result[i + j] = s2[j];
+		j++;
 	}
-	result[i] = '\0';
+	result[i + j] = '\0';
 	free(s1);
 	return (result);
 }
@@ -69,8 +67,8 @@ char	*gnl_substr(char *s, unsigned int start, size_t len)
 		return (NULL);
 	s_len = gnl_strlen(s);
 	if (start >= s_len)
-		return (malloc(1) ? (sub = malloc(1), sub[0] = '\0', sub) : NULL);
-	if (len > s_len - start)
+		len = 0;
+	else if (len > s_len - start)
 		len = s_len - start;
 	sub = malloc(len + 1);
 	if (!sub)
