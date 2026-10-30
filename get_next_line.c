@@ -52,7 +52,7 @@ static char	*extract_line(char *stash)
 static char	*trim_stash(char *stash)
 {
 	char	*newline;
-	char	*leftover;
+	char	*new_stash;
 
 	newline = gnl_strchr(stash, '\n');
 	if (!newline)
@@ -60,15 +60,15 @@ static char	*trim_stash(char *stash)
 		free(stash);
 		return (NULL);
 	}
-	leftover = gnl_substr(stash, (unsigned int)(newline - stash) + 1,
+	new_stash = gnl_substr(stash, (unsigned int)(newline - stash) + 1,
 			gnl_strlen(newline + 1));
 	free(stash);
-	if (!leftover || !leftover[0])
+	if (!new_stash || !new_stash[0])
 	{
-		free(leftover);
+		free(new_stash);
 		return (NULL);
 	}
-	return (leftover);
+	return (new_stash);
 }
 
 char	*get_next_line(int fd)
