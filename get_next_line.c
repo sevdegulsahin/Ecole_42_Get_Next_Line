@@ -1,0 +1,73 @@
+#include "get_next_line.h"
+
+static char *read_fail(char *buf, char *stash) {
+  free(buf);
+  free(stash);
+  return (NULL);
+}
+
+static char *read_into_stash(int fd, char *stash) {
+  char *buf;
+  ssize_t bytes_read;
+  buf = malloc(BUFFER_SIZE + 1);
+  if (!buf)
+    return (NULL);
+  bytes_read = 1;
+  while (!gnl_strchr(stash, '\n') && bytes_read > 0) {
+    bytes_read = read(fd, buf, BUFFER_SIZE);
+    if (bytes_read < 0)
+      return (read_fail(buf, stash));
+    buf[bytes_read] = '\0';
+    stash = gnl_strjoin(stash, buf);
+    if (!stash) {
+      free(buf);
+      return NULL;
+    }
+  }
+  free(buf);
+  return stash;
+}
+
+static char *extract_line(char *stash) {
+  char *newline;
+  size_t len;
+  if (!stash || !stash[0])
+    return NULL;
+  newline = gnl_strchr(stash, '\n');
+  if (newline)
+    len = (size_t)(newline - stash) + 1;
+  else
+    len = gnl_strlen(stash);
+  return (gnl_substr(stash, 0, len));
+}
+
+static char *update_stash(char *stash) {
+  char *newline;
+  char *new_stash;
+  newline = gnl_strchr(stash, '\n');
+  if (!newline) {
+    free(stash);
+    return (NULL);
+  }
+  new_stash = gnl_substr(stash, (unsigned int)(newline - stash) + 1,
+                         gnl_strlen(newline + 1));
+  free(stash);
+  if (!new_stash || !new_stash[0]) {
+    free(new_stash);
+    return NULL;
+  }
+  return new_stash;
+}
+
+char *get_next_line(int fd) {
+  static char *stash;
+  char *line;
+  if (fd < 0 || BUFFER_SIZE <= 0)
+    return NULL;
+  stash = read_into_stash(fd, stash);
+  if (!stash)
+    return NULL;
+  line = extract_line(stash);
+  stash = update_stash(stash);
+  return line;
+}
